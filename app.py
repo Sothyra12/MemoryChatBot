@@ -1,12 +1,18 @@
 """
 Author: Sothyra Chan
 Last Modified by: Sothyra Chan
-Date Last Modified: 2024-08-01
+Date Last Modified: 2024-08-02
 Program Description: This module handles user input and interaction with the ChatGPT API.
 Revision History:
-  - 2024-07-31: Initial creation
-  - 2024-08-01: Added error handling for API responses
+  - 2024-07-30: Added initial setup for ChatGPT API integration.
+  - 2024-07-31: Implemented memory-based conversation tracking.
+  - 2024-08-1: Enhanced error handling for API initialization and updated the code due to some deprecated version.
+  - 2024-08-1: Set up a virtual environment, and completed the projected.
+Source: This implementation is based on the YouTube tutorial "AI Memory ChatBot with Conversational Memory | ChatGPT API and LangChain" by Caffeine and Code.
+Author: Avratanu Biswas
+URL: https://www.youtube.com/watch?v=cHjlperESbg&t=898s
 """
+
 
 # Import necessary libraries
 import os
@@ -16,20 +22,20 @@ from langchain.chains.conversation.memory import ConversationEntityMemory
 from langchain.chains.conversation.prompt import ENTITY_MEMORY_CONVERSATION_TEMPLATE
 from langchain_community.chat_models import ChatOpenAI
 
-# Initial session state
+# Initialize session state
 if "generated" not in st.session_state:
-    st.session_state["generated"] = []  # output from the model
+    st.session_state["generated"] = []  # Model's output
 if "past_conversation" not in st.session_state:
-    st.session_state["past_conversation"] = []  # input of conversation history
+    st.session_state["past_conversation"] = []  # User's input history
 if "input" not in st.session_state:
-    st.session_state["input"] = ""  # save input of past conversation history
+    st.session_state["input"] = ""  # Current user input
 if "stored_session" not in st.session_state:
-    st.session_state["stored_session"] = []  # conversation session
+    st.session_state["stored_session"] = []  # Saved conversation sessions
 
-# Create a function to retrieve and store user input
 def get_text():
     """
     Get user input text.
+
     Returns:
         str: User input text
     """
@@ -42,22 +48,23 @@ def get_text():
     )
     return input_text
 
-# Define a function to start a new chat session
 def new_chat():
     """
     Clears session state and commences a new chat session.
     """
     save = []
+    # Save the current conversation to stored sessions
     for i in range(len(st.session_state['generated']) - 1, -1, -1):
         save.append("User: " + st.session_state["past_conversation"][i])
-        # Access the correct part of the dictionary for the response
+        # Access the response from the generated dictionary
         bot_response = st.session_state["generated"][i].get("response", "")
         save.append("Bot: " + bot_response)
     st.session_state["stored_session"].append(save)
+    # Reset session states
     st.session_state["generated"] = []
     st.session_state["past_conversation"] = []
     st.session_state["input"] = ""
-    # Re-initialize the entity memory to clear it
+    # Reinitialize the entity memory to clear it
     st.session_state.entity_memory = ConversationEntityMemory(llm=llm, k=10)
 
 # Set the title of the app
@@ -90,7 +97,7 @@ if api_key:
         )
 
     except Exception as e:
-        st.error(f"Failed to initialize OpenAI: {e}")  # Added error handling for initialization
+        st.error(f"Failed to initialize OpenAI: {e}")  # Error handling for API initialization
 else:
     st.error("No API found! Please enter your OpenAI API-Key to continue.")
 
@@ -108,8 +115,9 @@ if user_input:
     st.session_state.generated.append(output)
 
 with st.expander("Conversation"):
+    # Display the conversation history
     for i in range(len(st.session_state['generated']) - 1, -1, -1):
         st.info(st.session_state["past_conversation"][i])
-        # Access the correct part of the dictionary for the response
+        # Access the response from the generated dictionary
         bot_response = st.session_state["generated"][i].get("response", "")
         st.success(bot_response, icon="🤖")
