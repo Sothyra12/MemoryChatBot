@@ -2,7 +2,7 @@
 Author: Sothyra Chan
 Last Modified by: Sothyra Chan
 Date Last Modified: 2024-08-02
-Program Description: This module handles user input and interaction with the ChatGPT API.
+Program Description: This module handles user input and interaction with the ChatGPT API during entire conversation sessions.
 Revision History:
   - 2024-07-30: Added initial setup for ChatGPT API integration.
   - 2024-07-31: Implemented memory-based conversation tracking.
